@@ -16,7 +16,7 @@ class PacketHeader(PackedLittleEndianStructure):
         ("sessionTime", ctypes.c_float),
         ("frameIdentifier", ctypes.c_uint32),
         ("playerCarIndex", ctypes.c_uint8),
-        ("secondaryPlayerCarIndex", ctypes.c_uint8),
+        ("secondaryPlayerCarIndex", ctypes.c_uint8)
     ]
 
 class LapData(PackedLittleEndianStructure):
@@ -48,7 +48,7 @@ class LapData(PackedLittleEndianStructure):
         ("penalties", ctypes.c_uint8),
         ("gridPosition", ctypes.c_uint8),
         ("driverStatus", ctypes.c_uint8),
-        ("resultStatus", ctypes.c_uint8),
+        ("resultStatus", ctypes.c_uint8)
     ]
 
 
@@ -56,7 +56,7 @@ class PacketLapData(PackedLittleEndianStructure):
 
     _fields_ = [
         ("header", PacketHeader),  # Header
-        ("lapData", LapData * 22),  # Lap data for all cars on track
+        ("lapData", LapData * 22)  # Lap data for all cars on track
     ]
 
 
@@ -77,7 +77,7 @@ class CarTelemetryData(PackedLittleEndianStructure):
         ("tyresInnerTemperature", ctypes.c_uint8 * 4),
         ("engineTemperature", ctypes.c_uint16),
         ("tyresPressure", ctypes.c_float * 4),
-        ("surfaceType", ctypes.c_uint8 * 4),
+        ("surfaceType", ctypes.c_uint8 * 4)
     ]
 
 class PacketCarTelemetryData(PackedLittleEndianStructure):
@@ -88,7 +88,7 @@ class PacketCarTelemetryData(PackedLittleEndianStructure):
         ("buttonStatus", ctypes.c_uint32),
         ("mfdPanelIndex", ctypes.c_uint8),
         ("mfdPanelIndexSecondaryPlayer", ctypes.c_uint8),
-        ("suggestedGear", ctypes.c_int8),
+        ("suggestedGear", ctypes.c_int8)
     ]
 
 class CarStatusData(PackedLittleEndianStructure):
@@ -123,7 +123,7 @@ class CarStatusData(PackedLittleEndianStructure):
         ("ersDeployMode", ctypes.c_uint8),
         ("ersHarvestedThisLapMGUK", ctypes.c_float),
         ("ersHarvestedThisLapMGUH", ctypes.c_float),
-        ("ersDeployedThisLap", ctypes.c_float),
+        ("ersDeployedThisLap", ctypes.c_float)
     ]
 
 
@@ -131,7 +131,7 @@ class PacketCarStatusData(PackedLittleEndianStructure):
 
     _fields_ = [
         ("header", PacketHeader),
-        ("carStatusData", CarStatusData * 22),
+        ("carStatusData", CarStatusData * 22)
     ]
 
 PacketType = {
