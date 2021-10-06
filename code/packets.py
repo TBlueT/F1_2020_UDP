@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 import ctypes
 
 class PackedLittleEndianStructure(ctypes.LittleEndianStructure):

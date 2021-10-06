@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+#-*- coding: utf-8 -*-
 
 import os, sys
 
@@ -16,6 +16,7 @@ class mainWindow(QMainWindow, GUI_class):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.show()
 
         self.udp_pack = UDP_pack(self)
         self.data_process = Process(self)
@@ -24,15 +25,23 @@ class mainWindow(QMainWindow, GUI_class):
 
     def lapData_ui(self, object, data):
         getattr(self, object).setText(data)
-
+        getattr(self, object).repaint()
     def carTelemetryData_ui(self, object, data):
         getattr(self,object).setText(data)
 
     def carStatusData_ui(self, ID, object, data):
         if ID == "setStyleSheet":
             getattr(self, object).setStyleSheet(data)
+
         elif ID == "setText":
             getattr(self, object).setText(data)
+
+        elif ID == "setPixmap":
+            getattr(self, object).setPixmap(data)
+
+    def closeEvent(self, evant):
+        self.udp_pack.Working = False
+        self.data_process.Working = False
 
 
 
@@ -46,6 +55,6 @@ if __name__ == "__main__":
     sys.excepthook = my_exception_hook
 
     app = QApplication(sys.argv)
+    app.aboutToQuit.connect(mainWindow)
     MainWindow = mainWindow()
-    MainWindow.show()
     app.exec()

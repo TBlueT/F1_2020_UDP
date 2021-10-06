@@ -1,16 +1,20 @@
-#-*- coding:utf-8 -*-
+#-*- coding: utf-8 -*-
 
 import socket, time, datetime
 import numpy as np
-from PyQt5 import QtCore, QtGui
-
+from PyQt5 import QtCore, QtGui, QtTest
+from PyQt5.QtWidgets import *
 from packets import *
 
 class Process(QtCore.QThread):
     def __init__(self, parent=None):
         super(Process, self).__init__(parent)
+        self.Working = True
         self.mainWindow = parent
         self.udp_pack = self.mainWindow.udp_pack
+
+        self.ersStoreEnergy_bar = QtGui.QPixmap("1.png")
+
         self.LED_bar = 0
         self.LED_bar_old = 0
 
@@ -20,7 +24,7 @@ class Process(QtCore.QThread):
         self.my_my_ersDeployMode_old = 0
 
     def run(self):
-        while True:
+        while self.Working:
             if self.udp_pack.Packet_LapData_in:
                 DataPack = self.udp_pack.Packet_LapData
                 self.LapDataPart(DataPack)
@@ -34,9 +38,11 @@ class Process(QtCore.QThread):
             elif self.udp_pack.Packet_CarStatusData_in:
                 DataPack = self.udp_pack.Packet_CarStatusData
                 self.CarStatusDataPart(DataPack)
+
                 self.udp_pack.Packet_CarStatusData_in = False
             else:
-                time.sleep(0.0001)
+                QtTest.QTest.qWait(1)
+
 
     def map(self, x, in_min, in_max, out_min, out_max):
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
@@ -54,7 +60,6 @@ class Process(QtCore.QThread):
         self.mainWindow.lapData_ui("CurrentLapTime",
                                    F"{my_currentLapTime_hour}{my_currentLapTime_minute}{my_currentLapTime_second}{my_currentLapTime_microsecond}")
 
-
     def CarTelemetryDataPart(self, DataPack):
         my_gear = DataPack.carTelemetryData[DataPack.header.playerCarIndex].gear
         my_gear = F"{my_gear}" if DataPack.carTelemetryData[
@@ -70,12 +75,13 @@ class Process(QtCore.QThread):
 
         self.LED_bar = int(DataPack.carTelemetryData[DataPack.header.playerCarIndex].revLightsPercent / 7.14)
         if self.LED_bar != self.LED_bar_old:
-            for i in range(1, self.LED_bar + 1):
-                self.mainWindow.carTelemetryData_ui(F"LED_{i}", "■")
-
-            for i in range(self.LED_bar, 14):
-                if i != 14:
-                    self.mainWindow.carTelemetryData_ui(F"LED_{i + 1}", " ")
+            if self.LED_bar != 0:
+                for i in range(0, self.LED_bar):
+                    self.mainWindow.carTelemetryData_ui(F"LED_{i + 1}", "■")
+            if self.LED_bar != 14:
+                for i in range(self.LED_bar, 14):
+                    if i != 14:
+                        self.mainWindow.carTelemetryData_ui(F"LED_{i + 1}", " ")
             self.LED_bar_old = self.LED_bar
 
 
@@ -99,6 +105,11 @@ class Process(QtCore.QThread):
         self.my_ersStoreEnergy = int(
             self.map(DataPack.carStatusData[DataPack.header.playerCarIndex].ersStoreEnergy, 0, 4000000, 0, 100))
         if self.my_ersStoreEnergy != self.my_ersStoreEnergy_old:
-            # self.mainWindow.carStatusData_ui("ersStoreEnergy_bar", self.my_ersStoreEnergy)
+
+            ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(int(
+            self.map(self.my_ersStoreEnergy, 0, 100, 0, 803)), 70)
+            #ersStoreEnergy_img.fill(QtGui.QColor('red'))
+
+            self.mainWindow.carStatusData_ui("setPixmap", "ersStoreEnergy_Bar", ersStoreEnergy_img)
             self.mainWindow.carStatusData_ui("setText", "ersStoreEnergy_percent", F"{self.my_ersStoreEnergy}")
             self.my_ersStoreEnergy_old = self.my_ersStoreEnergy

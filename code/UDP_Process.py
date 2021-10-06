@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+#-*- coding: utf-8 -*-
 
 import socket, time, datetime
 import numpy as np
@@ -9,6 +9,7 @@ from packets import *
 class UDP_pack(QtCore.QThread):
     def __init__(self, parent=None):
         super(UDP_pack, self).__init__(parent)
+        self.Working = True
         self.mainWindow = parent
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(('localhost', 20777))
@@ -21,7 +22,7 @@ class UDP_pack(QtCore.QThread):
         self.Packet_CarTelemetryData_in = False
         self.Packet_CarStatusData_in = False
     def run(self):
-        while True:
+        while self.Working:
             data, addr = self.sock.recvfrom(10000)
             buf = unpack_udp_packet(data)
             if buf:
