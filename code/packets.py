@@ -20,6 +20,49 @@ class PacketHeader(PackedLittleEndianStructure):
         ("secondaryPlayerCarIndex", ctypes.c_uint8)
     ]
 
+class MarshalZone(PackedLittleEndianStructure):
+
+    _fields_ = [("zoneStart", ctypes.c_float), ("zoneFlag", ctypes.c_int8)]
+
+
+class WeatherForecastSample(PackedLittleEndianStructure):
+
+    _fields_ = [
+        ("sessionType", ctypes.c_uint8),
+        ("timeOffset", ctypes.c_uint8),
+        ("weather", ctypes.c_uint8),
+        ("trackTemperature", ctypes.c_int8),
+        ("airTemperature", ctypes.c_int8),
+    ]
+
+
+class PacketSessionData(PackedLittleEndianStructure):
+
+    _fields_ = [
+        ("header", PacketHeader),
+        ("weather", ctypes.c_uint8),
+        ("trackTemperature", ctypes.c_int8),
+        ("airTemperature", ctypes.c_int8),
+        ("totalLaps", ctypes.c_uint8),
+        ("trackLength", ctypes.c_uint16),
+        ("sessionType", ctypes.c_uint8),
+        ("trackId", ctypes.c_int8),
+        ("formula", ctypes.c_uint8),
+        ("sessionTimeLeft", ctypes.c_uint16),
+        ("sessionDuration", ctypes.c_uint16),
+        ("pitSpeedLimit", ctypes.c_uint8),
+        ("gamePaused", ctypes.c_uint8),
+        ("isSpectating", ctypes.c_uint8),
+        ("spectatorCarIndex", ctypes.c_uint8),
+        ("sliProNativeSupport", ctypes.c_uint8),
+        ("numMarshalZones", ctypes.c_uint8),
+        ("marshalZones", MarshalZone * 21),
+        ("safetyCarStatus", ctypes.c_uint8),
+        ("networkGame", ctypes.c_uint8),
+        ("numWeatherForecastSamples", ctypes.c_uint8),
+        ("weatherForecastSamples", WeatherForecastSample * 20),
+    ]
+
 class LapData(PackedLittleEndianStructure):
 
     _fields_ = [
@@ -57,9 +100,8 @@ class PacketLapData(PackedLittleEndianStructure):
 
     _fields_ = [
         ("header", PacketHeader),  # Header
-        ("lapData", LapData * 22)  # Lap data for all cars on track
+        ("lapData", LapData * 22)
     ]
-
 
 class CarTelemetryData(PackedLittleEndianStructure):
 
@@ -136,6 +178,7 @@ class PacketCarStatusData(PackedLittleEndianStructure):
     ]
 
 PacketType = {
+    (2020, 1, 1): PacketSessionData,
     (2020, 1, 2): PacketLapData,
     (2020, 1, 6): PacketCarTelemetryData,
     (2020, 1, 7): PacketCarStatusData

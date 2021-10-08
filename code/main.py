@@ -13,6 +13,7 @@ from process import *
 GUI_class = uic.loadUiType('ui.ui')[0]
 
 class mainWindow(QMainWindow, GUI_class):
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -23,21 +24,34 @@ class mainWindow(QMainWindow, GUI_class):
         self.udp_pack.start()
         self.data_process.start()
 
-    def lapData_ui(self, object, data):
+        self.data_process.Set_Text.connect(self.Set_Text)
+        self.data_process.Set_Pixmap.connect(self.Set_Pixmap)
+        self.data_process.Set_StyleSheet.connect(self.Set_StyleSheet)
+
+    @pyqtSlot(str, str)
+    def Set_Text(self, object, data):
         getattr(self, object).setText(data)
-        getattr(self, object).repaint()
-    def carTelemetryData_ui(self, object, data):
-        getattr(self,object).setText(data)
+
+    @pyqtSlot(str, QImage)
+    def Set_Pixmap(self, object, data):
+        getattr(self,object).setPixmap(QtGui.QPixmap.fromImage(data))
+        #time.sleep(0.001)
+
+    @pyqtSlot(str, str)
+    def Set_StyleSheet(self, object, data):
+        getattr(self, object).setStyleSheet(data)
 
     def carStatusData_ui(self, ID, object, data):
         if ID == "setStyleSheet":
             getattr(self, object).setStyleSheet(data)
-
+            #time.sleep(0.001)
         elif ID == "setText":
             getattr(self, object).setText(data)
 
         elif ID == "setPixmap":
             getattr(self, object).setPixmap(data)
+            #time.sleep(0.001)
+            #getattr(self, object).repaint()
 
     def closeEvent(self, evant):
         self.udp_pack.Working = False

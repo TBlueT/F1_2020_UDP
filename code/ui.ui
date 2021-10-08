@@ -98,6 +98,9 @@
          <property name="text">
           <string>0</string>
          </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
@@ -654,37 +657,58 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="2" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="CurrentLapNum">
          <property name="font">
           <font>
-           <family>Agency FB</family>
-           <pointsize>30</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
+           <family>Arial</family>
+           <pointsize>35</pointsize>
           </font>
          </property>
          <property name="styleSheet">
           <string notr="true">color: rgb(255, 255, 255);</string>
          </property>
          <property name="text">
-          <string/>
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="FuelRemainingLaps">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>35</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="CarPosition">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>35</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
