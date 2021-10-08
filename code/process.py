@@ -24,6 +24,14 @@ class Process(QtCore.QThread):
         ersStoreEnergy_bar_img = QtGui.QPixmap.fromImage(ersStoreEnergy_bar_img)
 
         self.ersStoreEnergy_bar = QtGui.QPixmap(ersStoreEnergy_bar_img)
+
+        ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(803, 20)
+        self.mainWindow.carStatusData_ui("setPixmap", "ersStoreEnergy_Bar", ersStoreEnergy_img)
+
+        ersStoreEnergy_img.fill(QtGui.QColor(255, 255, 255))
+        ersStoreEnergy_img = ersStoreEnergy_img.scaled(350, 20)
+        self.mainWindow.carStatusData_ui("setPixmap", "ErsDeployedThisLap", ersStoreEnergy_img)
+        self.mainWindow.carStatusData_ui("setPixmap", "label_3", ersStoreEnergy_img)
         self.loading_img = QtGui.QPixmap("loading2.png")
 
         self.LED_bar = 0
@@ -148,24 +156,31 @@ class Process(QtCore.QThread):
             self.Set_Text.emit("FuelRemainingLaps", F"{self.FuelRemainingLaps}")
             self.FuelRemainingLaps_old = self.FuelRemainingLaps
 
+        if DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed or self.drs_onoff:
+            if self.drs_drsAllowed == False:
+                self.Set_Text.emit(F"LED_{15}", "■")
+                self.drs_drsAllowed = True
+        else:
+            self.drs_drsAllowed = False
+
         self.my_ersDeployMode = DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployMode
         if self.my_ersDeployMode != self.my_my_ersDeployMode_old:
             if self.my_ersDeployMode == 0:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(0,0,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", F"0")
+                self.Set_Text.emit("ersDeployMode_num", "0")
             elif self.my_ersDeployMode == 1:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(230,230,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", F"1")
+                self.Set_Text.emit("ersDeployMode_num", "1")
             elif self.my_ersDeployMode == 2:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(0,220,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", F"3")
+                self.Set_Text.emit("ersDeployMode_num", "3")
             elif self.my_ersDeployMode == 3:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(0,0,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", F"2")
+                self.Set_Text.emit("ersDeployMode_num", "2")
             self.my_my_ersDeployMode_old = self.my_ersDeployMode
 
         self.my_ersStoreEnergy = int(
@@ -180,12 +195,9 @@ class Process(QtCore.QThread):
                                          F"color: rgb(255,{int(self.map(self.my_ersStoreEnergy, 0, 10, 0, 255))},0);")
 
             self.mainWindow.carStatusData_ui("setPixmap", "ersStoreEnergy_Bar", ersStoreEnergy_img)
-            self.Set_Text.emit("ersStoreEnergy_percent", F"{self.my_ersStoreEnergy}")
+            self.Set_Text.emit("ersStoreEnergy_percent", F"{self.my_ersStoreEnergy}%")
             self.my_ersStoreEnergy_old = self.my_ersStoreEnergy
 
-        if DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed or self.drs_onoff:
-            if self.drs_drsAllowed == False:
-                self.Set_Text.emit(F"LED_{15}", "■")
-                self.drs_drsAllowed = True
-        else:
-            self.drs_drsAllowed = False
+        print(DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployedThisLap)
+
+
