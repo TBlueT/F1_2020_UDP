@@ -7,7 +7,7 @@ UDP Send Rate : 20Hz<br>
 UDP Format : 2020<br>
 
 Download the executable file:
-https://drive.google.com/file/d/1mnMkIPTH2Kco6bdqQkxrSaYhBhLKPAMu/view?usp=sharing
+https://drive.google.com/file/d/1QgLoVXn9dD5yP_kp0k7MB0ZWquJmSsvD/view?usp=sharing
 
 <h2>Currently available features</h2>
 currentLapTime<br>
