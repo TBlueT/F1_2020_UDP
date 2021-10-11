@@ -21,12 +21,10 @@ class Process(QtCore.QThread):
 
         self.LED_bar = 0
 
-        self.FuelRemainingLaps = 0
-        self.FuelRemainingLaps_old = 0
-        self.ErsStoreEnergy = 0
-        self.ErsStoreEnergy_old = 0
-        self.ErsDeployMode = 0
-        self.ErsDeployMode_old = 0
+        self.FuelMix = comparison()
+        self.FuelRemainingLaps = comparison()
+        self.ErsStoreEnergy = comparison()
+        self.ErsDeployMode = comparison()
 
         self.Drs_onoff = 0
         self.Drs_drsAllowed = 0
@@ -37,11 +35,11 @@ class Process(QtCore.QThread):
 
         self.ersStoreEnergy_bar = QtGui.QPixmap.fromImage(ersStoreEnergy_bar_img)
 
-        ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(803, 20)
+        ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(self.mainWindow.ersStoreEnergy_Bar.width(), 20)
         self.Set_Pixmap.emit("ersStoreEnergy_Bar", ersStoreEnergy_img)
 
         ersStoreEnergy_img.fill(QtGui.QColor(255, 255, 255))
-        ersStoreEnergy_img = ersStoreEnergy_img.scaled(350, 20)
+        ersStoreEnergy_img = ersStoreEnergy_img.scaled(self.mainWindow.ErsDeployedThisLap.width(), 20)
         self.Set_Pixmap.emit("ErsDeployedThisLap", ersStoreEnergy_img)
         self.Set_Pixmap.emit("label_3", ersStoreEnergy_img)
         self.loading_img = QtGui.QPixmap("loading2.png")
@@ -152,10 +150,27 @@ class Process(QtCore.QThread):
 
 
     def CarStatusDataPart(self, DataPack):
-        self.FuelRemainingLaps = round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelRemainingLaps, 1)
-        if self.FuelRemainingLaps != self.FuelRemainingLaps_old:
-            self.Set_Text.emit("FuelRemainingLaps", F"{self.FuelRemainingLaps}")
-            self.FuelRemainingLaps_old = self.FuelRemainingLaps
+        self.FuelMix.add_new(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelMix)
+        if self.FuelMix.different():
+            FuelMix_key = {
+                (0): "[1] Lean",
+                (1): "[2] Standard",
+                (2): "[3] Roch",
+                (3): "[4] Max"
+            }
+            self.Set_Text.emit("FuelMix", F"{FuelMix_key[self.FuelMix.new]}")
+            self.FuelMix.add_old(self.FuelMix.new)
+
+        self.FuelRemainingLaps.add_new(round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelRemainingLaps, 2))
+        if self.FuelRemainingLaps.different():
+
+            if self.FuelRemainingLaps.new > 0:
+                self.Set_Text.emit("FuelRemainingLaps", F"[+{self.FuelRemainingLaps.new}]")
+                self.Set_StyleSheet.emit("FuelRemainingLaps", F"color: rgb(0,255,0);")
+            else:
+                self.Set_Text.emit("FuelRemainingLaps", F"[{self.FuelRemainingLaps.new}]")
+                self.Set_StyleSheet.emit("FuelRemainingLaps", F"color: rgb(255,0,0);")
+            self.FuelRemainingLaps.add_old(self.FuelRemainingLaps.new)
 
         if DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed or self.Drs_onoff:
             if self.Drs_drsAllowed == False:
@@ -164,41 +179,44 @@ class Process(QtCore.QThread):
         else:
             self.Drs_drsAllowed = False
 
-        self.ErsDeployMode = DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployMode
-        if self.ErsDeployMode != self.ErsDeployMode_old:
-            if self.ErsDeployMode == 0:
-                self.Set_StyleSheet.emit("OVERTAKE",
-                                         "background-color: rgb(0,0,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", "0")
-            elif self.ErsDeployMode == 1:
-                self.Set_StyleSheet.emit("OVERTAKE",
-                                         "background-color: rgb(230,230,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", "1")
-            elif self.ErsDeployMode == 2:
-                self.Set_StyleSheet.emit("OVERTAKE",
-                                         "background-color: rgb(0,220,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", "3")
-            elif self.ErsDeployMode == 3:
-                self.Set_StyleSheet.emit("OVERTAKE",
-                                         "background-color: rgb(0,0,0); color: rgb(255,255,255);")
-                self.Set_Text.emit("ersDeployMode_num", "2")
-            self.ErsDeployMode_old = self.ErsDeployMode
+        self.ErsDeployMode.add_new(DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployMode)
+        if self.ErsDeployMode.different():
+            ErsDeployMode_key ={
+                (0): "background-color: rgb(0,0,0); color: rgb(255,255,255);",
+                (1): "background-color: rgb(230,230,0); color: rgb(255,255,255);",
+                (2): "background-color: rgb(0,220,0); color: rgb(255,255,255);",
+                (3): "background-color: rgb(0,0,0); color: rgb(255,255,255);"
+            }
+            self.Set_StyleSheet.emit("OVERTAKE",F"{ErsDeployMode_key[self.ErsDeployMode.new]}")
+            ersDeployMode_num_text = self.ErsDeployMode.new if self.ErsDeployMode.new < 2 else 5-self.ErsDeployMode.new
+            self.Set_Text.emit("ersDeployMode_num", F"{ersDeployMode_num_text}")
 
-        self.ErsStoreEnergy = int(
-            self.map(DataPack.carStatusData[DataPack.header.playerCarIndex].ersStoreEnergy, 0, 4000000, 0, 100))
-        if self.ErsStoreEnergy != self.ErsStoreEnergy_old:
+            self.ErsDeployMode.add_old(self.ErsDeployMode.new)
 
+        self.ErsStoreEnergy.add_new(int(
+            self.map(DataPack.carStatusData[DataPack.header.playerCarIndex].ersStoreEnergy, 0, 4000000, 0, 100)))
+        if self.ErsStoreEnergy.different():
             ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(int(
-            self.map(self.ErsStoreEnergy, 0, 100, 0, 803)), 20)
-            if self.ErsStoreEnergy < 10:
-                ersStoreEnergy_img.fill(QtGui.QColor(255,int(self.map(self.ErsStoreEnergy,0,10,0,255)),0))
+            self.map(self.ErsStoreEnergy.new, 0, 100, 0, self.mainWindow.ersStoreEnergy_Bar.width())), 20)
+            if self.ErsStoreEnergy.new < 10:
+                ersStoreEnergy_img.fill(QtGui.QColor(255,int(self.map(self.ErsStoreEnergy.new,0,10,0,255)),0))
                 self.Set_StyleSheet.emit("ersStoreEnergy_percent",
-                                         F"color: rgb(255,{int(self.map(self.ErsStoreEnergy, 0, 10, 0, 255))},0);")
+                                         F"color: rgb(255,{int(self.map(self.ErsStoreEnergy.new, 0, 10, 0, 255))},0);")
 
             self.Set_Pixmap.emit("ersStoreEnergy_Bar", ersStoreEnergy_img)
-            self.Set_Text.emit("ersStoreEnergy_percent", F"{self.ErsStoreEnergy}%")
-            self.ErsStoreEnergy_old = self.ErsStoreEnergy
+            self.Set_Text.emit("ersStoreEnergy_percent", F"{self.ErsStoreEnergy.new}%")
+            self.ErsStoreEnergy.add_old(self.ErsStoreEnergy.new)
 
-        print(float(DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployedThisLap))
+class comparison:
+    def __init__(self):
+        self.new = 0
+        self.old = 0
 
-
+    def add_new(self, data):
+        self.new = data
+    def add_old(self, data):
+        self.old = data
+    def different(self):
+        return True if self.new != self.old else False
+    def same(self):
+        return True if self.new == self.old else False
