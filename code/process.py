@@ -22,6 +22,7 @@ class Process(QtCore.QThread):
         self.LED_bar = 0
 
         self.FuelMix = comparison()
+        self.FuelCapacity = comparison()
         self.FuelRemainingLaps = comparison()
         self.ErsStoreEnergy = comparison()
         self.ErsDeployMode = comparison()
@@ -160,6 +161,11 @@ class Process(QtCore.QThread):
             }
             self.Set_Text.emit("FuelMix", F"{FuelMix_key[self.FuelMix.new]}")
             self.FuelMix.add_old(self.FuelMix.new)
+
+        self.FuelCapacity.add_new(round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelCapacity, 1))
+        if self.FuelCapacity.different():
+            self.Set_Text.emit("FuelCapacity", F"{self.FuelCapacity.new}")
+            self.FuelCapacity.add_old(self.FuelCapacity.new)
 
         self.FuelRemainingLaps.add_new(round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelRemainingLaps, 2))
         if self.FuelRemainingLaps.different():
