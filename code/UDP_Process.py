@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtGui
 from packets import *
 
 class UDP_pack(QtCore.QThread):
+
     def __init__(self, parent=None):
         super(UDP_pack, self).__init__(parent)
         self.Working = True

@@ -8,7 +8,7 @@ from part import *
 
 class Process(QtCore.QThread):
     Set_Text = QtCore.pyqtSignal(str, str)
-    Set_Pixmap = QtCore.pyqtSignal(str, QtGui.QImage)
+    Set_Pixmap = QtCore.pyqtSignal(str, QtGui.QPixmap)
     Set_StyleSheet = QtCore.pyqtSignal(str, str)
     def __init__(self, parent=None):
         super(Process, self).__init__(parent)
@@ -19,32 +19,32 @@ class Process(QtCore.QThread):
         self.Standby = False
         self.Standby_time = datetime.datetime.now()
 
-        ersStoreEnergy_bar_img = np.full((10, 10, 3), (255, 255, 0), dtype=np.uint8)
-        ersStoreEnergy_bar_img = QtGui.QImage(ersStoreEnergy_bar_img, 10, 10, 10 * 3, QtGui.QImage.Format_RGB888)
-        ersStoreEnergy_bar_img = QtGui.QPixmap.fromImage(ersStoreEnergy_bar_img)
-
-        self.ersStoreEnergy_bar = QtGui.QPixmap(ersStoreEnergy_bar_img)
-
-        ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(803, 20)
-        self.mainWindow.carStatusData_ui("setPixmap", "ersStoreEnergy_Bar", ersStoreEnergy_img)
-
-        ersStoreEnergy_img.fill(QtGui.QColor(255, 255, 255))
-        ersStoreEnergy_img = ersStoreEnergy_img.scaled(350, 20)
-        self.mainWindow.carStatusData_ui("setPixmap", "ErsDeployedThisLap", ersStoreEnergy_img)
-        self.mainWindow.carStatusData_ui("setPixmap", "label_3", ersStoreEnergy_img)
-        self.loading_img = QtGui.QPixmap("loading2.png")
-
         self.LED_bar = 0
 
         self.FuelRemainingLaps = 0
         self.FuelRemainingLaps_old = 0
-        self.my_ersStoreEnergy = 0
-        self.my_ersStoreEnergy_old = 0
-        self.my_ersDeployMode = 0
-        self.my_my_ersDeployMode_old = 0
+        self.ErsStoreEnergy = 0
+        self.ErsStoreEnergy_old = 0
+        self.ErsDeployMode = 0
+        self.ErsDeployMode_old = 0
 
-        self.drs_onoff = 0
-        self.drs_drsAllowed = 0
+        self.Drs_onoff = 0
+        self.Drs_drsAllowed = 0
+
+    def img_init(self):
+        ersStoreEnergy_bar_img = np.full((10, 10, 3), (255, 255, 0), dtype=np.uint8)
+        ersStoreEnergy_bar_img = QtGui.QImage(ersStoreEnergy_bar_img, 10, 10, 10 * 3, QtGui.QImage.Format_RGB888)
+
+        self.ersStoreEnergy_bar = QtGui.QPixmap.fromImage(ersStoreEnergy_bar_img)
+
+        ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(803, 20)
+        self.Set_Pixmap.emit("ersStoreEnergy_Bar", ersStoreEnergy_img)
+
+        ersStoreEnergy_img.fill(QtGui.QColor(255, 255, 255))
+        ersStoreEnergy_img = ersStoreEnergy_img.scaled(350, 20)
+        self.Set_Pixmap.emit("ErsDeployedThisLap", ersStoreEnergy_img)
+        self.Set_Pixmap.emit("label_3", ersStoreEnergy_img)
+        self.loading_img = QtGui.QPixmap("loading2.png")
 
     def run(self):
         while self.Working:
@@ -75,13 +75,14 @@ class Process(QtCore.QThread):
                 QtTest.QTest.qWait(1)   #stabilization?
 
             if (datetime.datetime.now() - self.Standby_time) > datetime.timedelta(microseconds=300000):
-                self.Standby = True
-                self.mainWindow.carStatusData_ui("setPixmap", "Gear", self.loading_img)
-
-                self.Set_Text.emit("OVERTAKE", "Standby")
+                if self.Standby == False:
+                    self.Set_Pixmap.emit("Gear", self.loading_img)
+                    self.Set_Text.emit("OVERTAKE", "Standby")
+                    self.Standby = True
             else:
                 self.Standby = False
                 self.Set_Text.emit("OVERTAKE", "OVERTAKE")
+
 
 
 
@@ -91,27 +92,27 @@ class Process(QtCore.QThread):
 
     def LapDataPart(self, DataPack):
 
-        self.my_currentLapTime(DataPack)
+        self.CurrentLapTime(DataPack)
 
         self.Set_Text.emit("CurrentLapNum", F"L{DataPack.lapData[DataPack.header.playerCarIndex].currentLapNum}")
         self.Set_Text.emit("CarPosition", F"P{DataPack.lapData[DataPack.header.playerCarIndex].carPosition}")
 
-    def my_currentLapTime(self, DataPack):
-        my_currentLapTime = datetime.datetime.utcfromtimestamp(
+    def CurrentLapTime(self, DataPack):
+        CurrentLapTime = datetime.datetime.utcfromtimestamp(
             DataPack.lapData[DataPack.header.playerCarIndex].currentLapTime)
 
-        my_currentLapTime_hour = F"{my_currentLapTime.hour}:" if my_currentLapTime.hour >= 10 else F"0{my_currentLapTime.hour}:" if my_currentLapTime.hour != 0 else ""
-        my_currentLapTime_minute = F"{my_currentLapTime.minute}:" if my_currentLapTime.minute >= 10 else F"0{my_currentLapTime.minute}:" if my_currentLapTime.minute != 0 or my_currentLapTime.hour != 0 else ""
-        my_currentLapTime_second = F"{my_currentLapTime.second}." if my_currentLapTime.second >= 10 else F"0{my_currentLapTime.second}."
-        my_currentLapTime_microsecond = F"{str(my_currentLapTime.microsecond)[0:3]}"
+        CurrentLapTime_hour = F"{CurrentLapTime.hour}:" if CurrentLapTime.hour >= 10 else F"0{CurrentLapTime.hour}:" if CurrentLapTime.hour != 0 else ""
+        CurrentLapTime_minute = F"{CurrentLapTime.minute}:" if CurrentLapTime.minute >= 10 else F"0{CurrentLapTime.minute}:" if CurrentLapTime.minute != 0 or CurrentLapTime.hour != 0 else ""
+        CurrentLapTime_second = F"{CurrentLapTime.second}." if CurrentLapTime.second >= 10 else F"0{CurrentLapTime.second}."
+        CurrentLapTime_microsecond = F"{str(CurrentLapTime.microsecond)[0:3]}"
 
         self.Set_Text.emit("CurrentLapTime",
-                           F"{my_currentLapTime_hour}{my_currentLapTime_minute}{my_currentLapTime_second}{my_currentLapTime_microsecond}")
+                           F"{CurrentLapTime_hour}{CurrentLapTime_minute}{CurrentLapTime_second}{CurrentLapTime_microsecond}")
 
 
     def CarTelemetryDataPart(self, DataPack):
 
-        self.gear_Process(DataPack)
+        self.Gear_Process(DataPack)
 
         self.Set_Text.emit("Soeed",F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed} KPH")
 
@@ -120,33 +121,33 @@ class Process(QtCore.QThread):
                                F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].tyresInnerTemperature[i]}'C")
 
         if DataPack.carTelemetryData[DataPack.header.playerCarIndex].drs:
-            if self.drs_onoff == False:
+            if self.Drs_onoff == False:
                 self.Set_Text.emit(F"LED_{14}", "■")
-                self.drs_onoff = True
+                self.Drs_onoff = True
         else:
-            self.drs_onoff = False
+            self.Drs_onoff = False
 
         self.LED_bar_Process(DataPack)
 
-    def gear_Process(self, DataPack):
-        my_gear = DataPack.carTelemetryData[DataPack.header.playerCarIndex].gear
-        my_gear = F"{my_gear}" if DataPack.carTelemetryData[
-                                      DataPack.header.playerCarIndex].gear > 0 else "N" if my_gear != -1 else "R"
-        self.Set_Text.emit("Gear", my_gear)
+    def Gear_Process(self, DataPack):
+        Gear = DataPack.carTelemetryData[DataPack.header.playerCarIndex].gear
+        Gear = F"{Gear}" if DataPack.carTelemetryData[
+                                      DataPack.header.playerCarIndex].gear > 0 else "N" if Gear != -1 else "R"
+        self.Set_Text.emit("Gear", Gear)
 
     def LED_bar_Process(self, DataPack):
         self.LED_bar = int(DataPack.carTelemetryData[DataPack.header.playerCarIndex].revLightsPercent / 6.65)
 
         if self.LED_bar != 0:
                 for i in range(1, 1 if self.LED_bar == 0 else self.LED_bar+1):
-                    LED_count = i if not self.drs_drsAllowed else i if i < 15 else 14
-                    LED_count = LED_count if not self.drs_onoff else LED_count if LED_count < 14 else 13
+                    LED_count = i if not self.Drs_drsAllowed else i if i < 15 else 14
+                    LED_count = LED_count if not self.Drs_onoff else LED_count if LED_count < 14 else 13
                     self.Set_Text.emit(F"LED_{LED_count}", "■")
 
         if self.LED_bar != 15:
                 for i in range(1 if self.LED_bar == 0 else self.LED_bar, 16):
-                    LED_count = i if not self.drs_drsAllowed else i if i < 15 else 14
-                    LED_count = LED_count if not self.drs_onoff else LED_count if LED_count < 14 else 13
+                    LED_count = i if not self.Drs_drsAllowed else i if i < 15 else 14
+                    LED_count = LED_count if not self.Drs_onoff else LED_count if LED_count < 14 else 13
                     self.Set_Text.emit(F"LED_{LED_count}", " ")
 
 
@@ -156,48 +157,48 @@ class Process(QtCore.QThread):
             self.Set_Text.emit("FuelRemainingLaps", F"{self.FuelRemainingLaps}")
             self.FuelRemainingLaps_old = self.FuelRemainingLaps
 
-        if DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed or self.drs_onoff:
-            if self.drs_drsAllowed == False:
+        if DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed or self.Drs_onoff:
+            if self.Drs_drsAllowed == False:
                 self.Set_Text.emit(F"LED_{15}", "■")
-                self.drs_drsAllowed = True
+                self.Drs_drsAllowed = True
         else:
-            self.drs_drsAllowed = False
+            self.Drs_drsAllowed = False
 
-        self.my_ersDeployMode = DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployMode
-        if self.my_ersDeployMode != self.my_my_ersDeployMode_old:
-            if self.my_ersDeployMode == 0:
+        self.ErsDeployMode = DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployMode
+        if self.ErsDeployMode != self.ErsDeployMode_old:
+            if self.ErsDeployMode == 0:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(0,0,0); color: rgb(255,255,255);")
                 self.Set_Text.emit("ersDeployMode_num", "0")
-            elif self.my_ersDeployMode == 1:
+            elif self.ErsDeployMode == 1:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(230,230,0); color: rgb(255,255,255);")
                 self.Set_Text.emit("ersDeployMode_num", "1")
-            elif self.my_ersDeployMode == 2:
+            elif self.ErsDeployMode == 2:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(0,220,0); color: rgb(255,255,255);")
                 self.Set_Text.emit("ersDeployMode_num", "3")
-            elif self.my_ersDeployMode == 3:
+            elif self.ErsDeployMode == 3:
                 self.Set_StyleSheet.emit("OVERTAKE",
                                          "background-color: rgb(0,0,0); color: rgb(255,255,255);")
                 self.Set_Text.emit("ersDeployMode_num", "2")
-            self.my_my_ersDeployMode_old = self.my_ersDeployMode
+            self.ErsDeployMode_old = self.ErsDeployMode
 
-        self.my_ersStoreEnergy = int(
+        self.ErsStoreEnergy = int(
             self.map(DataPack.carStatusData[DataPack.header.playerCarIndex].ersStoreEnergy, 0, 4000000, 0, 100))
-        if self.my_ersStoreEnergy != self.my_ersStoreEnergy_old:
+        if self.ErsStoreEnergy != self.ErsStoreEnergy_old:
 
             ersStoreEnergy_img = self.ersStoreEnergy_bar.scaled(int(
-            self.map(self.my_ersStoreEnergy, 0, 100, 0, 803)), 20)
-            if self.my_ersStoreEnergy < 10:
-                ersStoreEnergy_img.fill(QtGui.QColor(255,int(self.map(self.my_ersStoreEnergy,0,10,0,255)),0))
+            self.map(self.ErsStoreEnergy, 0, 100, 0, 803)), 20)
+            if self.ErsStoreEnergy < 10:
+                ersStoreEnergy_img.fill(QtGui.QColor(255,int(self.map(self.ErsStoreEnergy,0,10,0,255)),0))
                 self.Set_StyleSheet.emit("ersStoreEnergy_percent",
-                                         F"color: rgb(255,{int(self.map(self.my_ersStoreEnergy, 0, 10, 0, 255))},0);")
+                                         F"color: rgb(255,{int(self.map(self.ErsStoreEnergy, 0, 10, 0, 255))},0);")
 
-            self.mainWindow.carStatusData_ui("setPixmap", "ersStoreEnergy_Bar", ersStoreEnergy_img)
-            self.Set_Text.emit("ersStoreEnergy_percent", F"{self.my_ersStoreEnergy}%")
-            self.my_ersStoreEnergy_old = self.my_ersStoreEnergy
+            self.Set_Pixmap.emit("ersStoreEnergy_Bar", ersStoreEnergy_img)
+            self.Set_Text.emit("ersStoreEnergy_percent", F"{self.ErsStoreEnergy}%")
+            self.ErsStoreEnergy_old = self.ErsStoreEnergy
 
-        print(DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployedThisLap)
+        print(float(DataPack.carStatusData[DataPack.header.playerCarIndex].ersDeployedThisLap))
 
 

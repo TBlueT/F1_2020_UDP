@@ -18,40 +18,31 @@ class mainWindow(QMainWindow, GUI_class):
         super().__init__()
         self.setupUi(self)
         self.show()
-
+        
         self.udp_pack = UDP_pack(self)
         self.data_process = Process(self)
-        self.udp_pack.start()
-        self.data_process.start()
 
         self.data_process.Set_Text.connect(self.Set_Text)
         self.data_process.Set_Pixmap.connect(self.Set_Pixmap)
         self.data_process.Set_StyleSheet.connect(self.Set_StyleSheet)
 
+        self.data_process.img_init()
+
+        self.udp_pack.start()
+        self.data_process.start()
+
     @pyqtSlot(str, str)
     def Set_Text(self, object, data):
         getattr(self, object).setText(data)
 
-    @pyqtSlot(str, QImage)
+    @pyqtSlot(str, QPixmap)
     def Set_Pixmap(self, object, data):
-        getattr(self,object).setPixmap(QtGui.QPixmap.fromImage(data))
-        #time.sleep(0.001)
+        getattr(self,object).setPixmap(data)
 
     @pyqtSlot(str, str)
     def Set_StyleSheet(self, object, data):
         getattr(self, object).setStyleSheet(data)
-
-    def carStatusData_ui(self, ID, object, data):
-        if ID == "setStyleSheet":
-            getattr(self, object).setStyleSheet(data)
-            #time.sleep(0.001)
-        elif ID == "setText":
-            getattr(self, object).setText(data)
-
-        elif ID == "setPixmap":
-            getattr(self, object).setPixmap(data)
-            #time.sleep(0.001)
-            #getattr(self, object).repaint()
+        getattr(self, object).repaint()
 
     def closeEvent(self, evant):
         self.udp_pack.Working = False
