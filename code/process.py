@@ -162,20 +162,9 @@ class Process(QtCore.QThread):
             self.Set_Text.emit("FuelMix", F"{FuelMix_key[self.FuelMix.new]}")
             self.FuelMix.add_old(self.FuelMix.new)
 
-        self.FuelCapacity.add_new(round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelCapacity, 1))
-        if self.FuelCapacity.different():
-            self.Set_Text.emit("FuelCapacity", F"{self.FuelCapacity.new}")
-            self.FuelCapacity.add_old(self.FuelCapacity.new)
-
-        self.FuelRemainingLaps.add_new(round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelRemainingLaps, 2))
+        self.FuelRemainingLaps.add_new(round(DataPack.carStatusData[DataPack.header.playerCarIndex].fuelRemainingLaps, 1))
         if self.FuelRemainingLaps.different():
-
-            if self.FuelRemainingLaps.new > 0:
-                self.Set_Text.emit("FuelRemainingLaps", F"[+{self.FuelRemainingLaps.new}]")
-                self.Set_StyleSheet.emit("FuelRemainingLaps", F"color: rgb(0,255,0);")
-            else:
-                self.Set_Text.emit("FuelRemainingLaps", F"[{self.FuelRemainingLaps.new}]")
-                self.Set_StyleSheet.emit("FuelRemainingLaps", F"color: rgb(255,0,0);")
+            self.Set_Text.emit("FuelRemainingLaps", F"{self.FuelRemainingLaps.new}")
             self.FuelRemainingLaps.add_old(self.FuelRemainingLaps.new)
 
         if DataPack.carStatusData[DataPack.header.playerCarIndex].drsAllowed or self.Drs_onoff:

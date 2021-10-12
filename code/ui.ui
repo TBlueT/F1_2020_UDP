@@ -640,7 +640,7 @@
            <number>6</number>
           </property>
           <item row="1" column="2">
-           <widget class="QLabel" name="FuelRemainingLaps">
+           <widget class="QLabel" name="label_10">
             <property name="font">
              <font>
               <family>Arial</family>
@@ -651,7 +651,7 @@
              <string notr="true">color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
-             <string>0</string>
+             <string/>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -678,7 +678,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="FuelCapacity">
+           <widget class="QLabel" name="FuelRemainingLaps">
             <property name="font">
              <font>
               <family>Arial</family>
