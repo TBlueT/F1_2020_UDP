@@ -14,7 +14,7 @@ class UDP_pack(QtCore.QThread):
         self.mainWindow = parent
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(('localhost', 20777))
+        self.sock.bind(('0.0.0.0', 20777))
 
         self.Packet_SessionData = []
         self.Packet_LapData = []
