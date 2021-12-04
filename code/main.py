@@ -135,7 +135,7 @@ class PLT_UI(QDialog):
         self.y[self.next_x] = self.y[self.next_x] + [self.throttle]
 
         self.line.set_data(self.x[self.next_x], self.y[self.next_x])
-        backX = 0#len(self.x[self.next_x])-50
+        backX = len(self.x[self.next_x])-50
         self.canvas.axes.set_xlim(0 if backX < 0 else backX, len(self.x[self.next_x]))
         return [self.line]
 
