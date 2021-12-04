@@ -3,8 +3,7 @@
 import socket, time, datetime
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtTest
-from PyQt5.QtWidgets import *
-from part import *
+
 
 class Process(QtCore.QThread):
     Set_Text = QtCore.pyqtSignal(str, str)
@@ -15,6 +14,7 @@ class Process(QtCore.QThread):
         self.Working = True
         self.mainWindow = parent
         self.udp_pack = self.mainWindow.udp_pack
+        self.plt_ui = self.mainWindow.plt_ui
 
         self.Standby = False
         self.Standby_time = datetime.datetime.now()
@@ -29,6 +29,9 @@ class Process(QtCore.QThread):
 
         self.Drs_onoff = 0
         self.Drs_drsAllowed = 0
+
+        self.LapNum = 0
+
 
     def img_init(self):
         ersStoreEnergy_bar_img = np.full((10, 10, 3), (255, 255, 0), dtype=np.uint8)
@@ -93,7 +96,10 @@ class Process(QtCore.QThread):
 
         self.CurrentLapTime(DataPack)
 
-        self.Set_Text.emit("CurrentLapNum", F"L{DataPack.lapData[DataPack.header.playerCarIndex].currentLapNum}")
+        if self.LapNum != DataPack.lapData[DataPack.header.playerCarIndex].currentLapNum:
+            self.LapNum = DataPack.lapData[DataPack.header.playerCarIndex].currentLapNum
+            self.Set_Text.emit("CurrentLapNum", F"L{self.LapNum}")
+            self.plt_ui.update_canvas(3, self.LapNum)
         self.Set_Text.emit("CarPosition", F"P{DataPack.lapData[DataPack.header.playerCarIndex].carPosition}")
 
     def CurrentLapTime(self, DataPack):
@@ -112,7 +118,7 @@ class Process(QtCore.QThread):
     def CarTelemetryDataPart(self, DataPack):
 
         self.Gear_Process(DataPack)
-
+        self.Set_Text.emit("RPM", F"RPM {DataPack.carTelemetryData[DataPack.header.playerCarIndex].engineRPM}")
         self.Set_Text.emit("Soeed",F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed} KPH")
 
         for i in range(0, 4):
@@ -125,7 +131,10 @@ class Process(QtCore.QThread):
                 self.Drs_onoff = True
         else:
             self.Drs_onoff = False
-
+        throttle = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].throttle, 0, 1.0, 0, 100), 2)
+        brake = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].brake, 0, 1.0, 0, 100) ,2)
+        self.plt_ui.update_canvas(1, throttle)
+        self.plt_ui.update_canvas(2, brake)
         self.LED_bar_Process(DataPack)
 
     def Gear_Process(self, DataPack):

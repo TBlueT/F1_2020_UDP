@@ -1083,13 +1083,6 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="3">
         <widget class="QFrame" name="frame_9">
          <property name="frameShape">
@@ -1157,6 +1150,25 @@
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="RPM">
+         <property name="font">
+          <font>
+           <family>Arial</family>
+           <pointsize>30</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(255, 255, 255);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
