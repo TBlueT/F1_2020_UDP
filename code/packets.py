@@ -20,6 +20,52 @@ class PacketHeader(PackedLittleEndianStructure):
         ("secondaryPlayerCarIndex", ctypes.c_uint8)
     ]
 
+class CarMotionData(PackedLittleEndianStructure):
+    _fields_ = [
+        ("worldPositionX", ctypes.c_float),
+        ("worldPositionY", ctypes.c_float),
+        ("worldPositionZ", ctypes.c_float),
+        ("worldVelocityX", ctypes.c_float),
+        ("worldVelocityY", ctypes.c_float),
+        ("worldVelocityZ", ctypes.c_float),
+        ("worldForwardDirX", ctypes.c_int16),
+        ("worldForwardDirY", ctypes.c_int16),
+        ("worldForwardDirZ", ctypes.c_int16),
+        ("worldRightDirX", ctypes.c_int16),
+        ("worldRightDirY", ctypes.c_int16),
+        ("worldRightDirZ", ctypes.c_int16),
+        ("gForceLateral", ctypes.c_float),
+        ("gForceLongitudinal", ctypes.c_float),
+        ("gForceVertical", ctypes.c_float),
+        ("yaw", ctypes.c_float),
+        ("pitch", ctypes.c_float),
+        ("roll", ctypes.c_float),
+    ]
+
+
+class PacketMotionData(PackedLittleEndianStructure):
+    _fields_ = [
+        ("header", PacketHeader),
+        ("carMotionData", CarMotionData * 22),
+        # Extra player car ONLY data
+        ("suspensionPosition", ctypes.c_float * 4),
+        ("suspensionVelocity", ctypes.c_float * 4),
+        ("suspensionAcceleration", ctypes.c_float * 4),
+        ("wheelSpeed", ctypes.c_float * 4),
+        ("wheelSlip", ctypes.c_float * 4),
+        ("localVelocityX", ctypes.c_float),
+        ("localVelocityY", ctypes.c_float),
+        ("localVelocityZ", ctypes.c_float),
+        ("angularVelocityX", ctypes.c_float),
+        ("angularVelocityY", ctypes.c_float),
+        ("angularVelocityZ", ctypes.c_float),
+        ("angularAccelerationX", ctypes.c_float),
+        ("angularAccelerationY", ctypes.c_float),
+        ("angularAccelerationZ", ctypes.c_float),
+        ("frontWheelsAngle", ctypes.c_float),
+    ]
+
+
 class MarshalZone(PackedLittleEndianStructure):
 
     _fields_ = [("zoneStart", ctypes.c_float), ("zoneFlag", ctypes.c_int8)]
@@ -178,6 +224,7 @@ class PacketCarStatusData(PackedLittleEndianStructure):
     ]
 
 PacketType = {
+    (2020, 1, 0): PacketMotionData,
     (2020, 1, 1): PacketSessionData,
     (2020, 1, 2): PacketLapData,
     (2020, 1, 6): PacketCarTelemetryData,
@@ -186,7 +233,6 @@ PacketType = {
 
 
 def unpack_udp_packet(packet: bytes):
-
     header = PacketHeader.from_buffer_copy(packet)
     key = (header.packetFormat, header.packetVersion, header.packetId)
     if key not in PacketType:

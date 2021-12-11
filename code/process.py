@@ -27,6 +27,12 @@ class Process(QtCore.QThread):
         self.ErsStoreEnergy = comparison()
         self.ErsDeployMode = comparison()
 
+        self.Packet_MotionData = []
+        self.Packet_SessionData = []
+        self.Packet_LapData = []
+        self.Packet_CarTelemetryData = []
+        self.Packet_CarStatusData = []
+
         self.Drs_onoff = 0
         self.Drs_drsAllowed = 0
 
@@ -51,41 +57,49 @@ class Process(QtCore.QThread):
     def run(self):
         while self.Working:
 
-            if self.udp_pack.Packet_SessionData_in:
-                DataPack = self.udp_pack.Packet_SessionData
-                self.udp_pack.Packet_SessionData_in = False
+            if self.udp_pack.Packet_MotionData != self.Packet_MotionData:
+                self.Packet_MotionData = self.udp_pack.Packet_MotionData
+                DataPack = self.Packet_MotionData
+                self.plt_ui.update_canvas(5, DataPack.carMotionData[DataPack.header.playerCarIndex].gForceLongitudinal)
+                self.plt_ui.update_canvas(6, DataPack.carMotionData[DataPack.header.playerCarIndex].gForceLateral)
 
-            elif self.udp_pack.Packet_LapData_in:
-                DataPack = self.udp_pack.Packet_LapData
+
+            elif self.udp_pack.Packet_SessionData != self.Packet_SessionData:
+                self.Packet_SessionData = self.udp_pack.Packet_SessionData
+                DataPack = self.Packet_SessionData
+
+
+            elif self.udp_pack.Packet_LapData != self.Packet_LapData:
+                self.Packet_LapData = self.udp_pack.Packet_LapData
+                DataPack = self.Packet_LapData
                 self.LapDataPart(DataPack)
                 self.Standby_time = datetime.datetime.now()
-                self.udp_pack.Packet_LapData_in = False
 
-            elif self.udp_pack.Packet_CarTelemetryData_in:
-                DataPack = self.udp_pack.Packet_CarTelemetryData
+
+            elif self.udp_pack.Packet_CarTelemetryData != self.Packet_CarTelemetryData:
+                self.Packet_CarTelemetryData = self.udp_pack.Packet_CarTelemetryData
+                DataPack = self.Packet_CarTelemetryData
                 self.CarTelemetryDataPart(DataPack)
                 self.Standby_time = datetime.datetime.now()
-                self.udp_pack.Packet_CarTelemetryData_in = False
 
-            elif self.udp_pack.Packet_CarStatusData_in:
-                DataPack = self.udp_pack.Packet_CarStatusData
+
+            elif self.udp_pack.Packet_CarStatusData != self.Packet_CarStatusData:
+                self.Packet_CarStatusData = self.udp_pack.Packet_CarStatusData
+                DataPack = self.Packet_CarStatusData
                 self.CarStatusDataPart(DataPack)
                 self.Standby_time = datetime.datetime.now()
-                self.udp_pack.Packet_CarStatusData_in = False
+
 
             else:
                 QtTest.QTest.qWait(1)   #stabilization?
 
             if (datetime.datetime.now() - self.Standby_time) > datetime.timedelta(microseconds=300000):
                 if self.Standby == False:
-                    self.Set_Pixmap.emit("Gear", self.loading_img)
                     self.Set_Text.emit("OVERTAKE", "Standby")
                     self.Standby = True
             else:
                 self.Standby = False
                 self.Set_Text.emit("OVERTAKE", "OVERTAKE")
-
-
 
 
     def map(self, x, in_min, in_max, out_min, out_max):
