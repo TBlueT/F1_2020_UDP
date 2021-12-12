@@ -1,9 +1,10 @@
 #-*- coding: utf-8 -*-
 
-import socket, time, datetime
+import datetime
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtTest
 
+from Cdll import *
 
 class Process(QtCore.QThread):
     Set_Text = QtCore.pyqtSignal(str, str)
@@ -15,6 +16,13 @@ class Process(QtCore.QThread):
         self.mainWindow = parent
         self.udp_pack = self.mainWindow.udp_pack
         self.plt_ui = self.mainWindow.plt_ui
+
+        self.MathsDll = DLL()
+        self.map = self.MathsDll.Function("map",[c_double,c_double,c_double,c_double,c_double],c_double)
+        self.sum = self.MathsDll.Function("Sum", [c_double,c_double], c_double)
+        self.sub = self.MathsDll.Function("Sub", [c_double, c_double], c_double)
+        self.mul = self.MathsDll.Function("Mul", [c_double, c_double], c_double)
+        self.div = self.MathsDll.Function("Div", [c_double, c_double], c_double)
 
         self.Standby = False
         self.Standby_time = datetime.datetime.now()
@@ -41,7 +49,7 @@ class Process(QtCore.QThread):
 
     def img_init(self):
         ersStoreEnergy_bar_img = np.full((10, 10, 3), (255, 255, 0), dtype=np.uint8)
-        ersStoreEnergy_bar_img = QtGui.QImage(ersStoreEnergy_bar_img, 10, 10, 10 * 3, QtGui.QImage.Format_RGB888)
+        ersStoreEnergy_bar_img = QtGui.QImage(ersStoreEnergy_bar_img, 10, 10, self.mul(10, 3), QtGui.QImage.Format_RGB888)
 
         self.ersStoreEnergy_bar = QtGui.QPixmap.fromImage(ersStoreEnergy_bar_img)
 
@@ -89,7 +97,6 @@ class Process(QtCore.QThread):
                 self.CarStatusDataPart(DataPack)
                 self.Standby_time = datetime.datetime.now()
 
-
             else:
                 QtTest.QTest.qWait(1)   #stabilization?
 
@@ -100,11 +107,6 @@ class Process(QtCore.QThread):
             else:
                 self.Standby = False
                 self.Set_Text.emit("OVERTAKE", "OVERTAKE")
-
-
-    def map(self, x, in_min, in_max, out_min, out_max):
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
 
     def LapDataPart(self, DataPack):
 

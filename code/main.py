@@ -7,6 +7,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5 import uic
 
+
+
 from UDP_Process import *
 from process import *
 from PLOT import *
@@ -22,6 +24,7 @@ class mainWindow(QMainWindow, GUI_class):
         self.show()
         self.plt_ui = PLT_UI(self)
         self.plt_ui.show()
+
 
         
         self.udp_pack = UDP_pack(self)
