@@ -1,0 +1,22 @@
+﻿  pch.cpp
+  dllmain.cpp
+  uMaths.cpp
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(7,32): warning C4273: 'Sum': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(14,25): message : 'Sum'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(10,32): warning C4273: 'Sub': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(15,25): message : 'Sub'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(13,32): warning C4273: 'Mul': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(16,25): message : 'Mul'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(16,32): warning C4273: 'Div': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(17,25): message : 'Div'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(20,84): warning C4273: 'map': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(19,25): message : 'map'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(24,44): warning C4273: 'Rot_x': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(20,25): message : 'Rot_x'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(34,44): warning C4273: 'Rot_y': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(21,25): message : 'Rot_y'의 이전 정의를 참조하십시오.
+C:\box\C++\Maths\Maths\Maths\uMaths.cpp(44,35): warning C4273: 'CAngle': dll 연결이 일치하지 않습니다.
+C:\box\C++\Maths\Maths\Maths\uMaths.h(22,25): message : 'CAngle'의 이전 정의를 참조하십시오.
+  코드를 생성하고 있습니다...
+     C:\box\C++\Maths\Maths\x64\Debug\Maths.lib 라이브러리 및 C:\box\C++\Maths\Maths\x64\Debug\Maths.exp 개체를 생성하고 있습니다.
+  Maths.vcxproj -> C:\box\C++\Maths\Maths\x64\Debug\Maths.dll
