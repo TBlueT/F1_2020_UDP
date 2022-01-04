@@ -22,6 +22,8 @@ class UDP_pack(QtCore.QThread):
         self.Packet_CarTelemetryData = []
         self.Packet_CarStatusData = []
 
+        self.test = {1: 0}
+
     def run(self):
         while self.Working:
             data, addr = self.sock.recvfrom(10000)

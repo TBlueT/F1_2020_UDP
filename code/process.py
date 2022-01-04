@@ -10,6 +10,7 @@ class Process(QtCore.QThread):
     Set_Text = QtCore.pyqtSignal(str, str)
     Set_Pixmap = QtCore.pyqtSignal(str, QtGui.QPixmap)
     Set_StyleSheet = QtCore.pyqtSignal(str, str)
+
     def __init__(self, parent=None):
         super(Process, self).__init__(parent)
         self.Working = True
@@ -18,7 +19,7 @@ class Process(QtCore.QThread):
         self.plt_ui = self.mainWindow.plt_ui
 
         self.MathsDll = DLL()
-        self.map = self.MathsDll.Function("map",[c_double,c_double,c_double,c_double,c_double],c_double)
+        self.map = self.MathsDll.Function("map",[c_double,c_double,c_double,c_double,c_double], c_double)
         self.sum = self.MathsDll.Function("Sum", [c_double,c_double], c_double)
         self.sub = self.MathsDll.Function("Sub", [c_double, c_double], c_double)
         self.mul = self.MathsDll.Function("Mul", [c_double, c_double], c_double)
@@ -60,7 +61,6 @@ class Process(QtCore.QThread):
         ersStoreEnergy_img = ersStoreEnergy_img.scaled(self.mainWindow.ErsDeployedThisLap.width(), 20)
         self.Set_Pixmap.emit("ErsDeployedThisLap", ersStoreEnergy_img)
         self.Set_Pixmap.emit("label_3", ersStoreEnergy_img)
-        self.loading_img = QtGui.QPixmap("loading2.png")
 
     def run(self):
         while self.Working:
@@ -68,14 +68,18 @@ class Process(QtCore.QThread):
             if self.udp_pack.Packet_MotionData != self.Packet_MotionData:
                 self.Packet_MotionData = self.udp_pack.Packet_MotionData
                 DataPack = self.Packet_MotionData
+
                 self.plt_ui.update_canvas(5, DataPack.carMotionData[DataPack.header.playerCarIndex].gForceLongitudinal)
                 self.plt_ui.update_canvas(6, DataPack.carMotionData[DataPack.header.playerCarIndex].gForceLateral)
+                self.plt_ui.update_canvas(8, DataPack.carMotionData[DataPack.header.playerCarIndex].worldPositionX)
+                self.plt_ui.update_canvas(9, DataPack.carMotionData[DataPack.header.playerCarIndex].worldPositionZ)
 
-
+                self.Standby_time = datetime.datetime.now()
             elif self.udp_pack.Packet_SessionData != self.Packet_SessionData:
                 self.Packet_SessionData = self.udp_pack.Packet_SessionData
                 DataPack = self.Packet_SessionData
 
+                self.Standby_time = datetime.datetime.now()
 
             elif self.udp_pack.Packet_LapData != self.Packet_LapData:
                 self.Packet_LapData = self.udp_pack.Packet_LapData
@@ -100,14 +104,15 @@ class Process(QtCore.QThread):
             else:
                 QtTest.QTest.qWait(1)   #stabilization?
 
-            if (datetime.datetime.now() - self.Standby_time) > datetime.timedelta(microseconds=300000):
+            if (datetime.datetime.now() - self.Standby_time) > datetime.timedelta(microseconds=80000):
                 if self.Standby == False:
                     self.Set_Text.emit("OVERTAKE", "Standby")
                     self.Standby = True
+                    self.plt_ui.update_canvas(0, False)
             else:
                 self.Standby = False
                 self.Set_Text.emit("OVERTAKE", "OVERTAKE")
-
+                self.plt_ui.update_canvas(0, True)
     def LapDataPart(self, DataPack):
 
         self.CurrentLapTime(DataPack)
@@ -136,7 +141,7 @@ class Process(QtCore.QThread):
         self.Gear_Process(DataPack)
         self.Set_Text.emit("RPM", F"RPM {DataPack.carTelemetryData[DataPack.header.playerCarIndex].engineRPM}")
         self.Set_Text.emit("Soeed",F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed} KPH")
-
+        self.plt_ui.update_canvas(10, DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed)
         for i in range(0, 4):
             self.Set_Text.emit(F"TyresSurfaceTemperature_{i + 1}",
                                F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].tyresInnerTemperature[i]}'C")
@@ -149,8 +154,10 @@ class Process(QtCore.QThread):
             self.Drs_onoff = False
         throttle = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].throttle, 0, 1.0, 0, 100), 2)
         brake = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].brake, 0, 1.0, 0, 100) ,2)
+        steer = round(DataPack.carTelemetryData[DataPack.header.playerCarIndex].steer, 2)
         self.plt_ui.update_canvas(1, throttle)
         self.plt_ui.update_canvas(2, brake)
+        self.plt_ui.update_canvas(7, steer)
         self.LED_bar_Process(DataPack)
 
     def Gear_Process(self, DataPack):
