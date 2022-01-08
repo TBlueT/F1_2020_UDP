@@ -141,7 +141,7 @@ class Process(QtCore.QThread):
         self.Gear_Process(DataPack)
         self.Set_Text.emit("RPM", F"RPM {DataPack.carTelemetryData[DataPack.header.playerCarIndex].engineRPM}")
         self.Set_Text.emit("Soeed",F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed} KPH")
-        self.plt_ui.update_canvas(10, DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed)
+        self.plt_ui.update_canvas(10 , DataPack.carTelemetryData[DataPack.header.playerCarIndex].speed)
         for i in range(0, 4):
             self.Set_Text.emit(F"TyresSurfaceTemperature_{i + 1}",
                                F"{DataPack.carTelemetryData[DataPack.header.playerCarIndex].tyresInnerTemperature[i]}'C")
@@ -154,7 +154,7 @@ class Process(QtCore.QThread):
             self.Drs_onoff = False
         throttle = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].throttle, 0, 1.0, 0, 100), 2)
         brake = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].brake, 0, 1.0, 0, 100) ,2)
-        steer = round(DataPack.carTelemetryData[DataPack.header.playerCarIndex].steer, 2)
+        steer = round(self.map(DataPack.carTelemetryData[DataPack.header.playerCarIndex].steer, -1.0, 1.0, -90, 90), 2)
         self.plt_ui.update_canvas(1, throttle)
         self.plt_ui.update_canvas(2, brake)
         self.plt_ui.update_canvas(7, steer)

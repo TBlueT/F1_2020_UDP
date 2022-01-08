@@ -21,7 +21,8 @@ class plot(FigureCanvas):
         self.axes2.axis('off')
         self.axes3 = fig.add_subplot(337, xlim=(-10, 10), ylim=(-10, 10))
         self.axes3.grid()
-        self.axes4 = fig.add_subplot(338, xlim=(-1.5, 1.5), ylim=(-1, 1))
+        self.axes4 = fig.add_subplot(338, xlim=(-10, 10), ylim=(-10, 10))
+        self.axes4.grid()
         self.axes5 = fig.add_subplot(339, xlim=(-1000, 1000), ylim=(-1000, 1000))
         self.axes5.axis('off')
 
@@ -77,9 +78,16 @@ class PLT_UI(QDialog):
         self.line3, = self.canvas.axes3.plot(self.xG, self.yG, 'ro', animated=True,  lw=5)
 
         self.steer_data = 0
-        self.xSteer = [0, 0]
-        self.ySteer = [0, 0]
-        self.line4, = self.canvas.axes4.plot(self.xSteer, self.ySteer, 'g', animated=True,  lw=5)
+        self.xSteer = np.cos(np.radians(np.arange(360)))*8
+        self.ySteer = np.sin(np.radians(np.arange(360)))*8
+        self.xSteer2 = np.cos(np.radians(-1*np.arange(5)))*8
+        self.ySteer2 = np.sin(np.radians(-1*np.arange(5)))*8
+        self.xSteer2 = np.append(self.xSteer2, [self.xSteer2[len(self.xSteer2)-1], -self.xSteer2[len(self.xSteer2)-1]])
+        self.ySteer2 = np.append(self.ySteer2, [self.ySteer2[len(self.ySteer2)-1], self.ySteer2[len(self.ySteer2)-1]])
+        self.xSteer2 = np.append(self.xSteer2, [0, 0])
+        self.ySteer2 = np.append(self.ySteer2, [self.ySteer2[len(self.ySteer2)-1], self.ySteer[270]])
+        self.line4, = self.canvas.axes4.plot(self.xSteer, self.ySteer, 'g', animated=True,  lw=8)
+        self.line4_2, = self.canvas.axes4.plot(self.xSteer2, self.ySteer2, 'g', animated=True, lw=8)
 
         self.xPintData = []
         self.yPintData = []
@@ -133,7 +141,7 @@ class PLT_UI(QDialog):
             self.xG_data = data
 
         elif id == 7:
-            self.steer_data = data
+            self.steer_data = -data
 
         elif id == 8:
             self.xPintData = -data
@@ -144,7 +152,7 @@ class PLT_UI(QDialog):
             self.speed = data
 
     def updata(self, i):
-        if self.gamePaused:
+        if self.gamePaused and self.speed != 0.0:
             self.x = self.x + [len(self.x)]
             self.y = self.y + [self.throttle]
 
@@ -158,7 +166,7 @@ class PLT_UI(QDialog):
         return [self.line_old, self.line]
 
     def updata2(self, i):
-        if self.gamePaused:
+        if self.gamePaused and self.speed != 0.0:
             self.x2 = self.x2 + [len(self.x2)]
             self.y2 = self.y2 + [self.brake]
 
@@ -180,9 +188,15 @@ class PLT_UI(QDialog):
 
     def updata4(self, i):
         if self.gamePaused:
-            self.xSteer[0] = self.div(self.sum(self.xSteer[0], self.steer_data),2)
-            self.line4.set_data(self.xSteer, self.ySteer)
-        return [self.line4]
+            r = np.radians(self.steer_data)
+            s = np.sin(r)
+            c = np.cos(r)
+
+            xMap = (self.xSteer2 * c) - (self.ySteer2 * s)
+            yMap = (self.xSteer2 * s) + (self.ySteer2 * c)
+
+            self.line4_2.set_data(xMap, yMap)
+        return [self.line4, self.line4_2]
 
     def updata5(self, i):
         if self.gamePaused:
