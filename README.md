@@ -3,8 +3,6 @@
 
 Display : 10 inche, 1024 X 600<br>
 
-If you need a small screen, rename the pi_ui.ui file to ui.ui.
-
 <br>UDP Port : 20777<br>
 UDP Send Rate : 20Hz<br>
 UDP Format : 2020<br>
