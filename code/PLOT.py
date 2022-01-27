@@ -95,6 +95,9 @@ class PLT_UI(QDialog):
         self.yPintMap = []
         self.xPintMap_old = []
         self.yPintMap_old = []
+        self.XSizeMap = []
+        self.YSizeMap = []
+        self.LapNum = 0
         self.line5_old, = self.canvas.axes5.plot(self.xPintMap_old, self.yPintMap_old, '#0000ff', animated=True, lw=1)
         self.line5, = self.canvas.axes5.plot(self.xPintMap, self.yPintMap, '#00ff00', animated=True, lw=0.5)
 
@@ -119,6 +122,7 @@ class PLT_UI(QDialog):
         elif id == 2:
             self.brake = data
         elif id == 3:
+            self.LapNum = data
 
             self.x_old = self.x
             self.y_old = self.y
@@ -200,15 +204,14 @@ class PLT_UI(QDialog):
 
     def updata5(self, i):
         if self.gamePaused:
-            if self.xPintData:
+            if self.xPintData or self.yPintData:
                 self.xPintMap = np.append(self.xPintMap, self.xPintData)
-            if self.yPintData:
                 self.yPintMap = np.append(self.yPintMap, self.yPintData)
             xMap = []
             yMap = []
             xMap_old = []
             yMap_old = []
-            if len(self.xPintMap) >= 2 and self.speed != 0.0:
+            if len(self.xPintMap) >= 2 and self.speed != 0.0 and self.LapNum > 1:
                 xmaplen = self.xPintMap.size
                 ymaplen = self.yPintMap.size
                 if self.xPintMap[xmaplen - 1] != self.xPintMap[xmaplen - 2]:
@@ -230,12 +233,19 @@ class PLT_UI(QDialog):
 
                         xMap_old = xMap_old.tolist()
                         yMap_old = yMap_old.tolist()
-            if xMap:
+            elif len(self.xPintMap) >= 2 and self.LapNum <= 1:
+                MxPint = [None, None]
+                for idx, data in enumerate(self.xPintMap):
+                    if MxPint[0] is None or data > MxPint[0]:
+                        MxPint = [data, idx]
+                self.XSizeMap = (MxPint[0]/100)*28
+
+            if xMap or yMap:
                 self.line5_old.set_data(xMap_old, yMap_old)
                 self.line5.set_data(xMap, yMap)
-                self.canvas.axes5.set_xlim(xMap[len(xMap)-1] - 280, xMap[len(xMap)-1] + 280)
-            if yMap:
-                self.canvas.axes5.set_ylim(yMap[len(yMap)-1] - 280, yMap[len(yMap)-1] + 280)
+                self.canvas.axes5.set_xlim(xMap[len(xMap)-1] - self.XSizeMap, xMap[len(xMap)-1] + self.XSizeMap)
+                self.canvas.axes5.set_ylim(yMap[len(yMap)-1] - self.XSizeMap, yMap[len(yMap)-1] + self.XSizeMap)
+
         return [self.line5_old, self.line5]
 
     def drowmap(self, d):
